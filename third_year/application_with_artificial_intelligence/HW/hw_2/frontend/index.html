@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Amazon Price Searcher</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Amazon Price Searcher</h1>
+    <input type="text" id="searchBox" placeholder="Search for an item...">
+    <button id="searchButton">Search</button>
+    <div id="resultsContainer"></div>
+    <script>
+    document.getElementById('searchButton').addEventListener('click', () => {
+        const searchQuery = document.getElementById('searchBox').value;
+        fetch('/search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `query=${encodeURIComponent(searchQuery)}`
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(results => {
+            // Create a table to display the search results
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tr = document.createElement('tr');
+            const th1 = document.createElement('th');
+            th1.textContent = 'Name';
+            const th2 = document.createElement('th');
+            th2.textContent = 'Image';
+            tr.appendChild(th1);
+            tr.appendChild(th2);
+            thead.appendChild(tr);
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            for (const result of results) {
+                const tr = document.createElement('tr');
+                const td1 = document.createElement('td');
+                td1.textContent = result.name;
+                const td2 = document.createElement('td');
+                const img = document.createElement('img');
+                img.src = result.image;
+                img.width = 64;
+                img.height = 64;
+                td2.appendChild(img);
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                tbody.appendChild(tr);
+            }
+            table.appendChild(tbody);
+
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = '';
+            resultsContainer.appendChild(table);
+        })
+        .catch(error => {
+            console.error('Error fetching search results:', error);
+        });
+    });
+    </script>
+</body>
+</html>

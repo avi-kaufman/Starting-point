@@ -1,0 +1,30 @@
+# Amazon Price Searcher
+
+Amazon Price Searcher is a web app that allows users to search for items on Amazon.com and compare their prices across different Amazon websites (Amazon.com, Amazon.co.uk, Amazon.de, and Amazon.ca). The app also keeps a history of past searches.
+
+## Features
+
+- Search for items on Amazon.com
+- Compare item prices across Amazon.com, Amazon.co.uk, Amazon.de, and Amazon.ca
+- Display item prices in USD
+- Save search history in a local SQLite database
+- (Optional) Implement user authentication using Google Sign-In
+- (Optional) Link search history to specific users
+- (Optional) Implement a daily search limit per user
+
+## Technologies Used
+
+- Backend: Flask (Python)
+- Frontend: HTML, JavaScript
+- Web Scraping: Beautiful Soup, Requests
+- Database: SQLite
+
+## Setup and Installation
+
+1. Clone this repository:
+2. Install the required Python packages:
+3. Run the Flask application:
+4. Open your web browser and navigate to `http://localhost:5000`.
+
+
+

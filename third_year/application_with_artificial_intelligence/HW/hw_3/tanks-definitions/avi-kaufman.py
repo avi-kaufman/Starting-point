@@ -1,0 +1,72 @@
+from tanks import TankController, MOVE_FORWARD, MOVE_BACKWARD, TURN_LEFT, TURN_RIGHT, SHOOT, TANK_SIZE, GameState, Tank, normalize_angle
+from math import degrees, atan2, sqrt
+import random
+
+class MySmartTankController(TankController):
+    def __init__(self, tank_id: str):
+        self.tank_id = tank_id
+        self.obstacles = []  
+
+    @property
+    def id(self) -> str:
+        return "avi-kaufman"
+
+    def detect_collision(self, obstacle):
+        """Detects if the tank is about to collide with an obstacle."""
+        next_position = (self.tank.position[0] + self.tank.speed[0], self.tank.position[1] + self.tank.speed[1])
+        return next_position == obstacle.position
+
+    def avoid_collision(self, obstacle):
+        """Alters the direction of the tank to avoid a collision."""
+        if self.tank.speed[0] != 0:
+            self.tank.speed = (0, self.tank.speed[0])
+        else:
+            self.tank.speed = (self.tank.speed[1], 0)
+
+    def find_closest_enemy_tank(self, gameState: GameState) -> Tank:
+        my_tank = next(tank for tank in gameState.tanks if tank.id == self.id)
+        alive_enemy_tanks = [tank for tank in gameState.tanks if tank.id != self.id and tank.health > 0]
+        
+        min_distance = float('inf')
+        closest_enemy = None
+        for enemy_tank in alive_enemy_tanks:
+            dx = enemy_tank.position[0] - my_tank.position[0]
+            dy = enemy_tank.position[1] - my_tank.position[1]
+            distance = sqrt(dx * dx + dy * dy)
+            if distance < min_distance:
+                min_distance = distance
+                closest_enemy = enemy_tank
+
+        return closest_enemy
+
+    def decide_what_to_do_next(self, gameState: GameState) -> str:
+        my_tank = next(tank for tank in gameState.tanks if tank.id == self.id)
+        enemy_tank = self.find_closest_enemy_tank(gameState)
+        
+        dx = enemy_tank.position[0] - my_tank.position[0]
+        dy = enemy_tank.position[1] - my_tank.position[1]
+
+        distance = sqrt(dx * dx + dy * dy)
+        desired_angle = normalize_angle(degrees(atan2(-dy, dx)))
+        angle_diff = my_tank.angle - desired_angle
+
+        for obstacle in self.obstacles:
+            if self.detect_collision(obstacle):
+                self.avoid_collision(obstacle)
+
+        if my_tank.health < 30:
+            return MOVE_BACKWARD if random.random() < 0.7 else (TURN_LEFT if random.random() < 0.5 else TURN_RIGHT)
+        
+        if abs(angle_diff) < 10:
+            return SHOOT
+
+        if abs(angle_diff) > 5:
+            return TURN_LEFT if angle_diff < 0 else TURN_RIGHT
+        
+        if distance > max(TANK_SIZE) * 3:
+            return MOVE_FORWARD
+        elif distance < max(TANK_SIZE) * 2:
+            return MOVE_BACKWARD
+        else:
+            return SHOOT
+
